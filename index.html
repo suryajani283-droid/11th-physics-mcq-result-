@@ -44,7 +44,6 @@
 
         .hidden { display: none; }
 
-        /* --- Header --- */
         .school-logo {
             width: 80px;
             height: 80px;
@@ -74,7 +73,6 @@
             border: 1px solid #ddd;
         }
 
-        /* --- Input Styles --- */
         .input-group { text-align: left; margin-bottom: 20px; }
         label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--dark); }
         
@@ -97,7 +95,6 @@
 
         .optional-tag { font-weight: normal; color: #b2bec3; font-size: 0.75rem; }
 
-        /* --- Buttons --- */
         .btn-main {
             background: var(--primary-gradient);
             color: white;
@@ -114,7 +111,6 @@
 
         .btn-main:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(102, 126, 234, 0.5); }
 
-        /* --- Marksheet UI --- */
         .marksheet-card { text-align: center; }
         .score-circle {
             width: 120px;
@@ -187,7 +183,7 @@
 
             <div class="score-circle">
                 <span class="val" id="res-total"></span>
-                <span class="label">Total Marks</span>
+                <span class="label">Status/Marks</span>
             </div>
 
             <div class="data-grid">
@@ -225,7 +221,6 @@
     </div>
 
     <script>
-        // Data set
         const students = [
             { roll: 1158, name: "Sunil", right: 17, wrong: 9 },
             { roll: 1151, name: "Ankit", right: 18, wrong: 32 },
@@ -237,28 +232,42 @@
         ];
 
         function processResult() {
-            const rollVal = document.getElementById('roll-input').value;
+            const rollVal = parseInt(document.getElementById('roll-input').value);
             const nameVal = document.getElementById('name-input').value;
             const error = document.getElementById('error-msg');
 
-            const student = students.find(s => s.roll == rollVal);
+            const student = students.find(s => s.roll === rollVal);
 
-            if (!student) {
-                error.innerText = "❌ Roll number nahi mila. Dubara check karein.";
+            // Logic for Absent Students (Roll 1151-1159 but not in list)
+            if (!student && rollVal >= 1151 && rollVal <= 1159) {
+                document.getElementById('display-name').innerText = nameVal ? nameVal.toUpperCase() : "STUDENT";
+                document.getElementById('display-roll').innerText = rollVal;
+                document.getElementById('res-total').innerText = "ABSENT";
+                document.getElementById('res-right').innerText = "-";
+                document.getElementById('res-wrong').innerText = "-";
+                document.getElementById('res-neg').innerText = "-";
+                document.getElementById('res-un').innerText = "-";
+                document.getElementById('res-rank').innerText = "N/A";
+                document.getElementById('res-percentile').innerText = "0%";
+                
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('result-page').classList.remove('hidden');
                 return;
             }
 
-            // Calculations
+            if (!student) {
+                error.innerText = "❌ Roll number record mein nahi hai.";
+                return;
+            }
+
             const negMarking = student.wrong * 0.25;
             const finalScore = (student.right - negMarking).toFixed(2);
             const unattempted = 50 - (student.right + student.wrong);
 
-            // Ranking
             const allScores = students.map(s => s.right - (s.wrong * 0.25)).sort((a,b) => b-a);
             const rank = allScores.indexOf(parseFloat(finalScore)) + 1;
             const percentile = (((students.length - rank) / students.length) * 100).toFixed(2);
 
-            // Display Logic
             document.getElementById('display-name').innerText = nameVal ? nameVal.toUpperCase() : student.name.toUpperCase();
             document.getElementById('display-roll').innerText = student.roll;
             document.getElementById('res-right').innerText = student.right;
@@ -269,11 +278,9 @@
             document.getElementById('res-rank').innerText = "#" + rank;
             document.getElementById('res-percentile').innerText = percentile + "%";
 
-            // Switch Screen
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('result-page').classList.remove('hidden');
         }
     </script>
 </body>
 </html>
-
